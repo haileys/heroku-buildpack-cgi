@@ -13,8 +13,8 @@ export SERVER_PROTOCOL="${req_array[2]}"
 export SERVER_PORT="$PORT"
 export REQUEST_METHOD="${req_array[0]}"
 export REQUEST_URI="${req_array[1]}"
-export SCRIPT_NAME=$(echo "$REQUEST_URI" | sed 's/\([^?]*\)\?/\1/')
-export QUERY_STRING=$(echo "$REQUEST_URI" | sed -n 's/[^?]*\?\(.*\)/\1/p')
+export SCRIPT_NAME="$(echo "$REQUEST_URI" | sed 's/\([^?]*\)\?/\1/')"
+export QUERY_STRING="$(echo "$REQUEST_URI" | sed -n 's/[^?]*\?\(.*\)/\1/p')"
 
 echo ">> $REQUEST_METHOD $REQUEST_URI" >&2
 
@@ -61,9 +61,9 @@ Content-Type: text/html
 EOF
     exit
   fi
-  path_part=$(echo "$SCRIPT_NAME" | sed -n 's/\(.*\)\(\/.*\)$/\2/p')
+  path_part="$(echo "$SCRIPT_NAME" | sed -n 's/\(.*\)\(\/.*\)$/\2/p')"
   export PATH_INFO="$path_part$PATH_INFO"
-  export SCRIPT_NAME=$(echo "$SCRIPT_NAME" | sed -n 's/\(.*\)\(\/.*\)$/\1/p')
+  export SCRIPT_NAME="$(echo "$SCRIPT_NAME" | sed -n 's/\(.*\)\(\/.*\)$/\1/p')"
 done
 
 export SCRIPT_FILENAME="$(pwd)$SCRIPT_NAME"
@@ -83,11 +83,11 @@ fi
 # read request headers
 while true; do
   read header_line
-  header_line=$(echo "$header_line" | tr -d '\r\n')
+  header_line="$(echo "$header_line" | tr -d '\r\n')"
   if [ -z "$header_line" ]; then
     break
   fi
-  header_name=$(echo "$header_line" | sed -n 's/\([^:]*\): \(.*\)/\1/p' | tr '-' '_' | tr '[:lower:]' '[:upper:]')
+  header_name="$(echo "$header_line" | sed -n 's/\([^:]*\): \(.*\)/\1/p' | tr '-' '_' | tr '[:lower:]' '[:upper:]')"
   header_name="HTTP_$header_name"
   export $header_name="$(echo "$header_line" | sed -n 's/\([^:]*\): \(.*\)/\2/p')"
 done
