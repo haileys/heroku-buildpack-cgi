@@ -9,13 +9,18 @@ mkdir -p $BUILD_DIR/bin
 cp -r $LP_DIR/bin $BUILD_DIR
 
 echo "-----> Installing GNU netcat..."
-echo "       Downloading..."
-curl -L -o nc.tgz http://garr.dl.sourceforge.net/sourceforge/netcat/netcat-0.7.1.tar.gz &> /dev/null
-tar zfx nc.tgz
-cd netcat-0.7.1/
-echo "       Configuring..."
-./configure > /dev/null
-echo "       Compiling..."
-make > /dev/null
-cp src/netcat $BUILD_DIR/bin/nc
+if [ ! -f "$CACHE_DIR/nc" ]; then
+  echo "       Downloading..."
+  curl -L -o nc.tgz http://garr.dl.sourceforge.net/sourceforge/netcat/netcat-0.7.1.tar.gz &> /dev/null
+  tar zfx nc.tgz
+  cd netcat-0.7.1/
+  echo "       Configuring..."
+  ./configure > /dev/null
+  echo "       Compiling..."
+  make > /dev/null
+  cp src/netcat $CACHE_DIR/nc
+else
+  echo "       Installed from cache."
+fi
+cp $CACHE_DIR/nc $BUILD_DIR/bin/nc
 echo "       $($BUILD_DIR/bin/nc -h | head -n1)"
