@@ -1,6 +1,8 @@
-#!/bin/cat
+#!/bin/bash
 
+cat <<EOF
 addons:
 config_vars:
 default_process_types:
   web: bin/cgid
+EOF
