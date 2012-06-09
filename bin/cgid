@@ -5,8 +5,10 @@ touch tmp/running
 
 echo "cgid running"
 
-while [ -f tmp/running ]; do
-  rm -f tmp/connection
-  mkfifo tmp/connection
-  bin/request-handler < tmp/connection | netcat -c -l -p $PORT > tmp/connection
-done
+echo $PORT
+
+#while [ -f tmp/running ]; do
+#  rm -f tmp/connection
+#  mkfifo tmp/connection
+#  bin/request-handler < tmp/connection | netcat -c -l -p $PORT > tmp/connection
+#done
