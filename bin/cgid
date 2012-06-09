@@ -8,5 +8,5 @@ echo "cgid running on port $PORT"
 while [ -f tmp/running ]; do
   rm -f tmp/connection
   mkfifo tmp/connection
-  bin/request-handler < tmp/connection | ./nc -l -p $PORT > tmp/connection
+  bin/request-handler < tmp/connection | bin/nc -l -p $PORT > tmp/connection
 done
