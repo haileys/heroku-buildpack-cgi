@@ -8,12 +8,14 @@ mkdir -p $BUILD_DIR/tmp
 mkdir -p $BUILD_DIR/bin
 cp -r $LP_DIR/bin $BUILD_DIR
 
-echo "-----> Downloading GNU netcat..."
-curl -L -o nc.tgz http://garr.dl.sourceforge.net/sourceforge/netcat/netcat-0.7.1.tar.gz
-echo "-----> Compiling GNU netcat..."
+echo "-----> Installing GNU netcat..."
+echo "       Downloading..."
+curl -L -o nc.tgz http://garr.dl.sourceforge.net/sourceforge/netcat/netcat-0.7.1.tar.gz &> /dev/null
 tar zfx nc.tgz
 cd netcat-0.7.1/
-./configure
-make
-cp src/netcat $LP_DIR/bin/nc
-echo "       $($LP_DIR/bin/nc -h | head -n1)"
+echo "       Configuring..."
+./configure > /dev/null
+echo "       Compiling..."
+make > /dev/null
+cp src/netcat $BUILD_DIR/bin/nc
+echo "       $($BUILD_DIR/bin/nc -h | head -n1)"
