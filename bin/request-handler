@@ -30,6 +30,41 @@ EOF
   exit
 fi
 
+if [[ "$SCRIPT_NAME" == "/" ]]; then
+  # if the url is /, redirect to /cgi-bin/
+  echo "-> 302 Found" >&2
+    cat <<EOF
+  HTTP/1.1 302 Found
+  Location: /cgi-bin/
+
+
+EOF
+  exit
+fi
+
+if [[ ! "$SCRIPT_NAME" =~ ^/cgi-bin/ ]]; then
+  # if the url doesn't begin with /cgi-bin/, treat it as a file in public/
+  if [ -f "public$SCRIPT_NAME" ]; then
+    echo "-> 200 OK" >&2
+    content_type="$(file --mime-type "public$SCRIPT_NAME" | sed -n 's/.*: \(.*\)/\1/p')"
+    echo "HTTP/1.1 200 OK"
+    echo "Connection: close"
+    echo "Content-Type: $content_type"
+    echo
+    cat "public$SCRIPT_NAME"
+    exit
+  else
+    echo "-> 404 Not Found" >&2
+    cat <<EOF
+HTTP/1.1 404 Not Found
+Content-Type: text/html
+
+<h1>Not Found</h1>
+EOF
+    exit
+  fi
+fi
+
 # if the user requested a directory, try index.html and index.cgi before giving up
 if [ -d ".$SCRIPT_NAME" ]; then
   if [ -f ".$SCRIPT_NAME/index.html" ]; then
@@ -92,7 +127,16 @@ while true; do
   export $header_name="$(echo "$header_line" | sed -n 's/\([^:]*\): \(.*\)/\2/p')"
 done
 
-echo "-> 200 OK" >&2
-echo "HTTP/1.1 200 OK"
+$SCRIPT_FILENAME > tmp/response
+status_line="$(head -n1 tmp/response)"
+if [[ "$status_line" == HTTP* ]]; then
+  response_code="$(echo "$status_line" | sed -n 's/.* \(.* .*\)/\1/p')"
+  awk 'FNR>1' tmp/response > tmp/response2
+  mv tmp/response2 tmp/response
+else
+  response_code="200 OK"
+fi
+echo "-> $response_code" >&2
+echo "HTTP/1.1 $response_code"
 echo "Connection: close"
-$SCRIPT_FILENAME
+cat tmp/response
