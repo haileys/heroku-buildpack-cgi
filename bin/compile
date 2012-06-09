@@ -1,7 +1,9 @@
 #!/bin/sh
 
-cd $(dirname $0)
+BUILD_DIR=$1
+CACHE_DIR=$2
+LP_DIR=`cd $(dirname $0); cd ..; pwd`
 
-mkdir -p /app/tmp
-mkdir -p /app/bin
-cp cgid request-handler /app
+mkdir -p $BUILD_DIR/tmp
+mkdir -p $BUILD_DIR/bin
+cp -r bin $BUILD_DIR
