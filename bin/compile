@@ -6,4 +6,4 @@ LP_DIR=`cd $(dirname $0); cd ..; pwd`
 
 mkdir -p $BUILD_DIR/tmp
 mkdir -p $BUILD_DIR/bin
-cp -r bin $BUILD_DIR
+cp -r $LP_DIR/bin $BUILD_DIR
