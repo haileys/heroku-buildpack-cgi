@@ -6,6 +6,7 @@ LP_DIR=`cd $(dirname $0); cd ..; pwd`
 
 mkdir -p $BUILD_DIR/tmp
 mkdir -p $BUILD_DIR/bin
+mkdir -p $CACHE_DIR
 cp -r $LP_DIR/bin $BUILD_DIR
 
 echo "-----> Installing GNU netcat..."
