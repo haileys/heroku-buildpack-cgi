@@ -3,6 +3,8 @@
 # this file can be deleted to stop cgid
 touch tmp/running
 
+echo "cgid running"
+
 while [ -f tmp/running ]; do
   rm -f tmp/connection
   mkfifo tmp/connection
