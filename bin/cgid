@@ -5,7 +5,9 @@ touch tmp/running
 
 echo "cgid running"
 
-echo $PORT
+#echo $PORT
+
+netcat -c -l -p $PORT
 
 #while [ -f tmp/running ]; do
 #  rm -f tmp/connection
