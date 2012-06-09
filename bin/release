@@ -4,5 +4,5 @@ cat <<EOF
 addons:
 config_vars:
 default_process_types:
-  web: bin/cgid $PORT
+  web: bin/cgid
 EOF

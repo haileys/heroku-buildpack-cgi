@@ -3,12 +3,10 @@
 # this file can be deleted to stop cgid
 touch tmp/running
 
-listen_port=$1
-
 echo "cgid running"
 
 while [ -f tmp/running ]; do
   rm -f tmp/connection
   mkfifo tmp/connection
-  bin/request-handler < tmp/connection | netcat -c -l -p $listen_port > tmp/connection
+  bin/request-handler < tmp/connection | netcat -c -l -p $PORT > tmp/connection
 done
