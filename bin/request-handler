@@ -1,0 +1,97 @@
+#!/bin/bash
+
+# read first line of request into array of elements, eg: ["GET", "/", "HTTP/1.1"]
+read req_line
+req_array=($(echo "$req_line" | tr " " "\n"))
+
+# setup CGI environment variables
+export SERVER_SOFTWARE="heroku-buildpack-cgi"
+export SERVER_NAME=`hostname`
+export GATEWAY_INTERFACE="CGI/1.1"
+
+export SERVER_PROTOCOL="${req_array[2]}"
+export SERVER_PORT="$PORT"
+export REQUEST_METHOD="${req_array[0]}"
+export REQUEST_URI="${req_array[1]}"
+export SCRIPT_NAME=$(echo "$REQUEST_URI" | sed 's/\([^?]*\)\?/\1/')
+export QUERY_STRING=$(echo "$REQUEST_URI" | sed -n 's/[^?]*\?\(.*\)/\1/p')
+
+echo ">> $REQUEST_METHOD $REQUEST_URI" >&2
+
+# if path contains double dots, block the request as malicious
+if [[ "$SCRIPT_NAME" == *..* ]]; then
+  echo "-> 400 Bad Request" >&2
+  cat <<EOF
+HTTP/1.1 400 Bad Request
+Content-Type: text/html
+
+<h1>Bad Request</h1>
+EOF
+  exit
+fi
+
+# if the user requested a directory, try index.html and index.cgi before giving up
+if [ -d ".$SCRIPT_NAME" ]; then
+  if [ -f ".$SCRIPT_NAME/index.html" ]; then
+    export SCRIPT_NAME="$SCRIPT_NAME/index.html"
+  elif [ -f ".$SCRIPT_NAME/index.cgi" ]; then
+    export SCRIPT_NAME="$SCRIPT_NAME/index.cgi"
+  else
+    echo "-> 403 Forbidden" >&2
+    cat <<EOF
+HTTP/1.1 403 Forbidden
+Content-Type: text/html
+
+<h1>Forbidden</h1>
+EOF
+    exit
+  fi
+fi
+
+# attempt to pull the path info out of the request uri
+while [ ! -f ".$SCRIPT_NAME" ]; do
+  if [ -z "$SCRIPT_NAME" ]; then
+    # request uri is empty, 404 and exit
+    echo "-> 404 Not Found" >&2
+    cat <<EOF
+HTTP/1.1 404 Not Found
+Content-Type: text/html
+
+<h1>Not Found</h1>
+EOF
+    exit
+  fi
+  path_part=$(echo "$SCRIPT_NAME" | sed -n 's/\(.*\)\(\/.*\)$/\2/p')
+  export PATH_INFO="$path_part$PATH_INFO"
+  export SCRIPT_NAME=$(echo "$SCRIPT_NAME" | sed -n 's/\(.*\)\(\/.*\)$/\1/p')
+done
+
+export SCRIPT_FILENAME="$(pwd)$SCRIPT_NAME"
+
+if [ ! -x "$SCRIPT_FILENAME" ]; then
+  echo "!! $SCRIPT_FILENAME is not marked as executable" >&2
+  echo "-> 500 Internal Server Error" >&2
+  cat <<EOF
+HTTP/1.1 500 Internal Server Error
+Content-Type: text/html
+
+<h1>Internal Server Error</h1>
+EOF
+  exit
+fi
+
+# read request headers
+while true; do
+  read header_line
+  header_line=$(echo "$header_line" | tr -d '\r\n')
+  if [ -z "$header_line" ]; then
+    break
+  fi
+  header_name=$(echo "$header_line" | sed -n 's/\([^:]*\): \(.*\)/\1/p' | tr '-' '_' | tr '[:lower:]' '[:upper:]')
+  header_name="HTTP_$header_name"
+  export $header_name="$(echo "$header_line" | sed -n 's/\([^:]*\): \(.*\)/\2/p')"
+done
+
+echo "-> 200 OK" >&2
+echo "HTTP/1.1 200 OK"
+$SCRIPT_FILENAME

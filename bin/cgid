@@ -1,0 +1,10 @@
+#!/bin/bash
+
+# this file can be deleted to stop cgid
+touch tmp/running
+
+while [ -f tmp/running ]; do
+  rm -f tmp/connection
+  mkfifo tmp/connection
+  bin/request-handler < tmp/connection | netcat -clp 8080 > tmp/connection
+done

@@ -1,0 +1,6 @@
+#!/bin/cat
+
+addons:
+config_vars:
+default_process_types:
+  web: bin/cgid
