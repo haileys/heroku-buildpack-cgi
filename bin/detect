@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/ksh
 
 if [ -d "$1/cgi-bin" ]; then
     echo "CGI"
