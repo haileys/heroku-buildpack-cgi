@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/ksh
 
 # this file can be deleted to stop cgid
 touch tmp/running

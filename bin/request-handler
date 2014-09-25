@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/ksh
 
 # read first line of request into array of elements, eg: ["GET", "/", "HTTP/1.1"]
 read req_line
